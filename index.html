@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เครื่องคำนวณเปรียบเทียบราคา</title>
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-dark: #2563eb;
+      --background-color: #f9fafb;
+      --card-background: #ffffff;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --error-color: #ef4444;
+      --success-color: #10b981;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .card {
+      background: var(--card-background);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    .card-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-header p {
+      opacity: 0.9;
+    }
+
+    .card-content {
+      padding: 2rem;
+    }
+
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .product-item {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) auto;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--background-color);
+      border-radius: 8px;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .product-item:hover {
+      background: #f3f4f6;
+    }
+
+    @media (max-width: 768px) {
+      .product-item {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .input-group label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #4b5563;
+    }
+    input {
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+    .btn-outline:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+    .btn-copy {
+      padding: 0.5rem 1rem;
+      background: var(--success-color);
+      color: white;
+    }
+    .btn-copy:hover {
+      background: #059669;
+    }
+    .btn-delete {
+      padding: 0.5rem;
+      background: var(--error-color);
+      color: white;
+    }
+    .btn-delete:hover {
+      opacity: 0.9;
+    }
+
+    .results {
+      margin-top: 2rem;
+      display: none;
+    }
+    .results.show {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+    th {
+      background: var(--background-color);
+      font-weight: 600;
+    }
+
+    tr.best-value {
+      background: rgba(16, 185, 129, 0.1); /* highlight สำหรับ Best Value */
+    }
+    tr.next-best-value {
+      background: rgba(59, 130, 246, 0.1); /* highlight สำหรับ Next Best Value */
+    }
+
+    .summary {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.125rem;
+    }
+    .summary strong {
+      color: var(--primary-color);
+    }
+    .recommendation {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: var(--text-color);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+    footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h1>เครื่องคำนวณเปรียบเทียบราคา</h1>
+        <p>ค้นหาสินค้าที่คุ้มค่าที่สุด โดยไม่เปลี่ยนลำดับการแสดงผล</p>
+      </div>
+
+      <div class="card-content">
+        <!-- โซนรายการสินค้า -->
+        <div class="product-list" id="productList"></div>
+        
+        <!-- ปุ่มเพิ่ม / คำนวณ -->
+        <div class="button-group">
+          <button class="btn-outline" id="addProduct">
+            <span>＋</span>เพิ่มสินค้า
+          </button>
+          <button class="btn-primary" id="calculate">
+            <span>≡</span>คำนวณ
+          </button>
+        </div>
+
+        <!-- โซนผลลัพธ์ -->
+        <div class="results" id="results">
+          <h2>ผลลัพธ์</h2>
+
+          <!-- ตารางเปรียบเทียบ (ไม่เรียงใหม่ แสดงตามลำดับที่ผู้ใช้กรอก) -->
+          <table>
+            <thead>
+              <tr>
+                <th>แบรนด์</th>
+                <th>ราคาต่อหน่วย (บาท)</th>
+                <th>ความคุ้มค่า</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+
+          <!-- สรุปผล -->
+          <div class="summary" id="summary"></div>
+          <!-- ข้อความแนะนำเพิ่มเติม -->
+          <div class="recommendation" id="recommendation"></div>
+
+          <!-- ปุ่ม Copy -->
+          <button class="btn-copy" id="copyResults">Copy Results</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        <a href="https://github.com/witchakornb/Smart-Price-Comparator" target="_blank">
+          https://github.com/witchakornb/Smart-Price-Comparator
+        </a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const productList = document.getElementById('productList');
+      const addProductBtn = document.getElementById('addProduct');
+      const calculateBtn = document.getElementById('calculate');
+      const copyResultsBtn = document.getElementById('copyResults');
+      const results = document.getElementById('results');
+      const resultsBody = document.getElementById('resultsBody');
+      const summary = document.getElementById('summary');
+      const recommendation = document.getElementById('recommendation');
+
+      let productCount = 0;
+
+      // สร้างรายการสินค้า
+      function createProductItem() {
+        productCount++;
+        const div = document.createElement('div');
+        div.className = 'product-item';
+        div.innerHTML = `
+          <div class="input-group">
+            <label>ชื่อแบรนด์</label>
+            <input type="text" class="brand" value="Product ${productCount}">
+          </div>
+          <div class="input-group">
+            <label>ราคา</label>
+            <input type="number" class="price" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="input-group">
+            <label>จำนวน</label>
+            <input type="number" class="quantity" placeholder="1" min="1">
+          </div>
+          <button class="btn-delete" onclick="removeProduct(this)">✕</button>
+        `;
+        return div;
+      }
+
+      // เพิ่มสินค้า
+      function addProduct() {
+        productList.appendChild(createProductItem());
+      }
+
+      // ลบสินค้า
+      window.removeProduct = function(button) {
+        button.parentElement.remove();
+      };
+
+      // ฟังก์ชันคำนวณ
+      function calculate() {
+        // 1) อ่านข้อมูลจาก DOM ตามลำดับที่ผู้ใช้เพิ่ม
+        const productRows = document.querySelectorAll('.product-item');
+        const products = [];
+
+        productRows.forEach(item => {
+          const brand = item.querySelector('.brand').value.trim();
+          const price = parseFloat(item.querySelector('.price').value);
+          const quantity = parseFloat(item.querySelector('.quantity').value);
+
+          if (brand && !isNaN(price) && price > 0 && !isNaN(quantity) && quantity > 0) {
+            // เก็บ unitPrice เพื่อเอาไปเปรียบเทียบ
+            products.push({
+              brand,
+              price,
+              quantity,
+              unitPrice: price / quantity
+            });
+          }
+        });
+
+        if (products.length === 0) {
+          alert("กรุณากรอกข้อมูลสินค้าให้ถูกต้อง");
+          return;
+        }
+
+        // 2) หาค่า Best Value และ Next Best Value
+        //    - โดยใช้การ sort แยกต่างหาก แต่ "ไม่" ใช้ผล sort ไปเรียงตาราง
+        const sortedByUnitPrice = [...products].sort((a, b) => a.unitPrice - b.unitPrice);
+
+        // ตัวถูกที่สุด
+        const bestValue = sortedByUnitPrice[0];
+        // ตัวถัดมา (ถ้ามี)
+        const nextBest = sortedByUnitPrice[1] || null;
+
+        // กรณี Best Value มีหลายตัว (ราคาต่อหน่วยเท่ากัน)
+        const bestValuePrice = bestValue.unitPrice;
+        // หา nextBestPrice ที่ต่างจาก bestValuePrice
+        let nextBestPrice = null;
+        for (let i = 1; i < sortedByUnitPrice.length; i++) {
+          if (sortedByUnitPrice[i].unitPrice > bestValuePrice) {
+            nextBestPrice = sortedByUnitPrice[i].unitPrice;
+            break;
+          }
+        }
+
+        // 3) แสดงผลลัพธ์ในตาราง "ตามลำดับที่ผู้ใช้กรอก"
+        resultsBody.innerHTML = '';
+        products.forEach(prod => {
+          // ตรวจสอบว่า prod เป็น Best Value (unitPrice == bestValuePrice)
+          // หรือเป็น Next Best Value (unitPrice == nextBestPrice)
+          let valueText = '';
+          let rowClass = '';
+
+          if (prod.unitPrice === bestValuePrice) {
+            // ถ้า unitPrice เท่ากับ bestValuePrice => "คุ้มค่าที่สุด"
+            rowClass = 'best-value';
+            valueText = 'คุ้มค่าที่สุด';
+          } 
+          else if (nextBestPrice && prod.unitPrice === nextBestPrice) {
+            // ถ้า unitPrice = nextBestPrice => "คุ้มค่าลำดับถัดมา"
+            rowClass = 'next-best-value';
+            valueText = 'คุ้มค่าลำดับถัดมา';
+          }
+
+          const row = document.createElement('tr');
+          row.className = rowClass;
+          row.innerHTML = `
+            <td>${prod.brand}</td>
+            <td>THB ${prod.unitPrice.toFixed(2)}</td>
+            <td>${valueText}</td>
+          `;
+          resultsBody.appendChild(row);
+        });
+
+        // 4) สร้างข้อความสรุป
+        // diffPerUnit และ diffTotal (กรณี nextBestPrice != null)
+        let diffPerUnit = 0;
+        let diffTotal = 0;
+        if (nextBest && nextBest.unitPrice > bestValuePrice) {
+          diffPerUnit = nextBest.unitPrice - bestValuePrice;
+          diffTotal = diffPerUnit * bestValue.quantity;
+        }
+
+        // หาแบรนด์ทั้งหมดที่ unitPrice == bestValuePrice (เผื่อมีหลายตัว)
+        const bestBrands = sortedByUnitPrice.filter(p => p.unitPrice === bestValuePrice);
+        const bestBrandNames = bestBrands.map(p => p.brand).join(', ');
+
+        summary.innerHTML = `
+          <p>
+            แบรนด์ที่คุ้มค่าที่สุดคือ 
+            <strong>${bestBrandNames}</strong> 
+            ที่ราคาต่อหน่วย <strong>${bestValuePrice.toFixed(2)}</strong> บาท
+          </p>
+        `;
+
+        // 5) สร้างข้อความแนะนำ
+        let recommendHTML = '';
+
+        // หากมีหลายตัวคุ้มค่าเท่ากัน => เลือกตัวแรกเป็นหลักในการสรุป
+        // แต่ผู้ใช้ก็สามารถเลือกตัวอื่นที่ราคาต่อหน่วยเท่ากันได้
+        const mainBest = bestBrands[0]; 
+
+        recommendHTML += `
+          <p>
+            หากคุณซื้อ <strong>${mainBest.quantity}</strong> หน่วย 
+            ของ <strong>${mainBest.brand}</strong> 
+            รวมเป็นเงิน <strong>${mainBest.price.toFixed(2)}</strong> บาท
+          </p>
+        `;
+
+        if (nextBestPrice && diffPerUnit > 0) {
+          recommendHTML += `
+            <p>
+              ส่วน <strong>${nextBest.brand}</strong> (คุ้มค่าลำดับถัดมา) 
+              มีราคาต่อหน่วย <strong>${nextBest.unitPrice.toFixed(2)}</strong> บาท
+              <br/>
+              แบรนด์ <strong>${mainBest.brand}</strong> 
+              ถูกกว่า <strong>THB ${diffPerUnit.toFixed(2)}</strong> ต่อหน่วย
+              <br/>
+              หากซื้อ ${mainBest.quantity} หน่วย จะประหยัดได้ 
+              <strong>THB ${diffTotal.toFixed(2)}</strong>
+            </p>
+          `;
+        } 
+        else if (nextBest && diffPerUnit === 0) {
+          // ถ้าราคาต่อหน่วยของ nextBest == bestValue => เท่ากัน
+          recommendHTML += `
+            <p>
+              นอกจากนี้ <strong>${nextBest.brand}</strong> 
+              ก็มีราคาต่อหน่วยเท่ากัน 
+              เลือกแบรนด์ใดก็จ่ายเท่ากัน!
+            </p>
+          `;
+        }
+
+        // ถ้าไม่มี nextBest แปลว่ามีสินค้าเดียวหรือสินค้าทั้งหมด unitPrice เท่ากัน
+        if (!nextBest) {
+          recommendHTML += `
+            <p>คุณมีตัวเลือกเดียว หรือสินค้าทั้งหมดราคาเท่ากัน!</p>
+          `;
+        }
+
+        recommendation.innerHTML = recommendHTML;
+
+        // 6) แสดงผล
+        results.classList.add('show');
+      }
+
+      // ปุ่ม Copy
+      copyResultsBtn.addEventListener('click', () => {
+        const summaryText = summary.textContent.replace(/\s+/g, ' ').trim();
+        const recommendationText = recommendation.textContent.replace(/\s+/g, ' ').trim();
+        const fullText = `${summaryText}\n${recommendationText}`;
+        navigator.clipboard.writeText(fullText).then(() => {
+          alert('ผลลัพธ์ถูกคัดลอกไปยังคลิปบอร์ดแล้ว!');
+        });
+      });
+
+      // Events
+      addProductBtn.addEventListener('click', addProduct);
+      calculateBtn.addEventListener('click', calculate);
+
+      // เริ่มต้นด้วยสินค้า 2 รายการ
+      addProduct();
+      addProduct();
+    });
+  </script>
+</body>
+</html>
