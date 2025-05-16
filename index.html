@@ -6,31 +6,40 @@
     <title>เครื่องคำนวณเปรียบเทียบราคา</title>
     <style>
       :root {
-        /* ตัวแปรสี (CSS Variables) ใช้ในการปรับธีมได้ง่าย */
-        --primary-color: #3b82f6;
-        --primary-dark: #2563eb;
-        --background-color: #f9fafb;
+        --primary-color: #3b82f6; /* Blue 500 */
+        --primary-dark: #2563eb; /* Blue 600 */
+        --primary-light: #60a5fa; /* Blue 400 */
+        --background-color: #f3f4f6; /* Gray 100 */
         --card-background: #ffffff;
-        --text-color: #1f2937;
-        --border-color: #e5e7eb;
-        --error-color: #ef4444;
-        --success-color: #10b981;
+        --text-color: #1f2937; /* Gray 800 */
+        --text-secondary-color: #4b5563; /* Gray 600 */
+        --border-color: #d1d5db; /* Gray 300 */
+        --error-color: #ef4444; /* Red 500 */
+        --success-color: #10b981; /* Green 500 */
         --nav-height: 60px;
+        --border-radius-sm: 4px;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
       }
 
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol";
       }
 
       body {
         background-color: var(--background-color);
         color: var(--text-color);
-        line-height: 1.5;
-        padding-top: var(--nav-height); /* เว้นพื้นที่สำหรับ Navbar */
+        line-height: 1.6;
+        padding-top: var(--nav-height);
+        font-size: 16px;
       }
 
       /* Navigation Bar */
@@ -46,12 +55,12 @@
         justify-content: space-between;
         padding: 0 2rem;
         z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-md);
       }
       .navbar .logo {
         color: #fff;
         font-size: 1.5rem;
-        font-weight: bold;
+        font-weight: 600;
         text-decoration: none;
       }
       .navbar .nav-links {
@@ -59,34 +68,30 @@
         display: flex;
         gap: 1.5rem;
       }
-      .navbar .nav-links li {
-        display: inline;
-      }
       .navbar .nav-links a {
         color: #fff;
         text-decoration: none;
         font-size: 1rem;
-        transition: color 0.2s;
+        transition: color 0.2s ease-in-out;
       }
       .navbar .nav-links a:hover {
-        color: #d1d5db;
+        color: #dbeafe; /* Blue 200 for hover */
       }
 
       .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 2rem;
+        max-width: 900px; /* Slightly reduced for better focus */
+        margin: 2rem auto; /* Added top margin */
+        padding: 0 1rem; /* Padding for smaller screens */
         position: relative;
       }
 
       .card {
         background: var(--card-background);
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
         overflow: hidden;
       }
 
-      /* ส่วนหัวการ์ด (Header) */
       .card-header {
         background: linear-gradient(
           135deg,
@@ -95,199 +100,304 @@
         );
         color: #fff;
         text-align: center;
-        padding: 2rem;
+        padding: 2rem 1.5rem;
       }
       .card-header h1 {
-        font-size: 2rem;
+        font-size: 2.25rem; /* Increased size */
+        font-weight: 700;
         margin-bottom: 0.5rem;
       }
       .card-header p {
         opacity: 0.9;
+        font-size: 1.125rem;
       }
 
-      /* ส่วนเนื้อหาในการ์ด (Content) */
       .card-content {
         padding: 2rem;
       }
 
-      /* ส่วนรายการสินค้า */
+      /* Error Message Area */
+      .error-message-area {
+        background-color: rgba(239, 68, 68, 0.1); /* error-color with opacity */
+        color: var(--error-color);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 500;
+      }
+      .error-message-area.hidden {
+          display: none;
+      }
+
+
+      /* Product List */
       .product-list {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.5rem; /* Increased gap */
       }
       .product-item {
         display: grid;
-        grid-template-columns: repeat(4, 1fr) auto;
+        grid-template-columns: 3fr 2fr 2fr auto; /* Adjusted column proportions */
         gap: 1rem;
-        padding: 1rem;
-        background: var(--background-color);
-        border-radius: 8px;
-        transition: background 0.2s;
-        align-items: center;
+        padding: 1.25rem;
+        background: #f9fafb; /* Gray 50 */
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        align-items: flex-end; /* Align to bottom for button */
       }
       .product-item:hover {
-        background: #f3f4f6;
+        border-color: var(--primary-light);
+        box-shadow: var(--shadow-sm);
       }
 
       @media (max-width: 768px) {
         .product-item {
-          grid-template-columns: 1fr;
+          grid-template-columns: 1fr; /* Stack on mobile */
+          gap: 1rem;
+        }
+        .product-item .btn-delete {
+            margin-top: 0.5rem; /* Add some space when stacked */
+            width: 100%;
         }
       }
 
       .input-group {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.3rem;
       }
       .input-group label {
         font-size: 0.875rem;
-        font-weight: 600;
-        color: #4b5563;
+        font-weight: 500;
+        color: var(--text-secondary-color);
       }
-      input {
-        padding: 0.75rem;
+      input[type="text"],
+      input[type="number"] {
+        padding: 0.75rem 1rem;
         border: 1px solid var(--border-color);
-        border-radius: 6px;
+        border-radius: var(--border-radius-md);
         font-size: 1rem;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background-color: #fff;
       }
       input:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+      input::placeholder {
+        color: #9ca3af; /* Gray 400 */
       }
 
-      /* ปุ่มต่างๆ */
+      /* Buttons */
       .button-group {
         display: flex;
         gap: 1rem;
         justify-content: center;
-        margin-top: 2rem;
+        margin-top: 2.5rem; /* Increased margin */
+        margin-bottom: 1rem;
       }
       button {
         padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 6px;
+        border-radius: var(--border-radius-md);
         font-weight: 500;
+        font-size: 1rem;
         cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex; /* For icon alignment */
         align-items: center;
         gap: 0.5rem;
+        box-shadow: var(--shadow-sm);
       }
+      button svg {
+        width: 1.1em;
+        height: 1.1em;
+      }
+
       .btn-primary {
-        background: var(--primary-color);
+        background-color: var(--primary-color);
         color: #fff;
       }
       .btn-primary:hover {
-        background: var(--primary-dark);
+        background-color: var(--primary-dark);
+        box-shadow: var(--shadow-md);
       }
       .btn-outline {
-        background: transparent;
+        background-color: transparent;
         border: 1px solid var(--primary-color);
         color: var(--primary-color);
       }
       .btn-outline:hover {
-        background: var(--primary-color);
+        background-color: var(--primary-color);
         color: #fff;
+        box-shadow: var(--shadow-md);
       }
       .btn-copy {
-        padding: 0.5rem 1rem;
-        background: var(--success-color);
+        padding: 0.65rem 1.25rem; /* Slightly smaller */
+        background-color: var(--success-color);
         color: #fff;
+        margin-top: 1.5rem; /* Space from recommendation */
       }
       .btn-copy:hover {
-        background: #059669;
+        background-color: #059669; /* Darker success */
+        box-shadow: var(--shadow-md);
+      }
+      .btn-copy.copied {
+        background-color: #047857; /* Even darker green */
       }
       .btn-delete {
-        padding: 0.5rem;
-        background: var(--error-color);
+        padding: 0.6rem; /* Adjusted for icon button */
+        background-color: var(--error-color);
         color: #fff;
+        line-height: 1; /* For icon centering */
       }
       .btn-delete:hover {
-        opacity: 0.9;
+        background-color: #dc2626; /* Darker error */
+        opacity: 1;
+        box-shadow: var(--shadow-md);
+      }
+      .btn-delete svg {
+        margin: auto; /* Center icon if button has padding */
       }
 
-      /* ส่วนผลลัพธ์ */
+
+      /* Results Section */
       .results {
-        margin-top: 2rem;
-        display: none; /* ซ่อนก่อนคำนวณ */
+        margin-top: 2.5rem;
+        display: none;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
       }
       .results.show {
-        display: block; /* แสดงเมื่อคำนวณ */
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .results h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--primary-dark);
+        text-align: center;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 1rem;
+        margin-top: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border-radius: var(--border-radius-md);
+        overflow: hidden; /* For border-radius on table */
       }
-      th,
-      td {
+      th, td {
         border: 1px solid var(--border-color);
-        padding: 1rem;
+        padding: 1rem 1.25rem;
         text-align: left;
+        vertical-align: middle;
       }
       th {
-        background: var(--background-color);
+        background-color: #e5e7eb; /* Gray 200 */
         font-weight: 600;
+        color: var(--text-secondary-color);
+      }
+      td {
+        background-color: var(--card-background);
+      }
+      tr.best-value td {
+        background-color: rgba(16, 185, 129, 0.08); /* Lighter success */
+        font-weight: 500;
+      }
+      tr.best-value td:first-child::before {
+        content: "🏆 ";
+      }
+      tr.next-best-value td {
+        background-color: rgba(59, 130, 246, 0.08); /* Lighter primary */
+      }
+       tr.next-best-value td:first-child::before {
+        content: "🥈 ";
       }
 
-      /* best-value / next-best-value */
-      tr.best-value {
-        background: rgba(16, 185, 129, 0.1);
-      }
-      tr.next-best-value {
-        background: rgba(59, 130, 246, 0.1);
-      }
 
       .summary {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        background: rgba(59, 130, 246, 0.1);
-        border-radius: 8px;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background-color: rgba(59, 130, 246, 0.05); /* Very light primary */
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: var(--border-radius-md);
         text-align: center;
         font-size: 1.125rem;
       }
       .summary strong {
-        color: var(--primary-color);
+        color: var(--primary-dark);
+        font-weight: 600;
       }
       .recommendation {
-        margin-top: 1rem;
+        margin-top: 1.5rem;
+        padding: 1rem;
         font-size: 1rem;
-        line-height: 1.4;
+        line-height: 1.7;
         text-align: center;
-        color: var(--text-color);
+        color: var(--text-secondary-color);
+        background-color: #f9fafb; /* Gray 50 */
+        border-radius: var(--border-radius-md);
       }
+      .recommendation strong {
+          color: var(--text-color);
+          font-weight: 600;
+      }
+      .recommendation p {
+        margin-bottom: 0.75rem;
+      }
+      .recommendation p:last-child {
+        margin-bottom: 0;
+      }
+
 
       /* Footer */
       footer {
-        margin-top: 2rem;
+        margin-top: 3rem;
         text-align: center;
         font-size: 0.875rem;
-        padding: 1rem 0;
-        background-color: var(--background-color);
+        padding: 1.5rem 0;
+        background-color: var(--card-background);
         border-top: 1px solid var(--border-color);
+        color: var(--text-secondary-color);
       }
       footer a {
         color: var(--primary-color);
         text-decoration: none;
+        font-weight: 500;
       }
       footer a:hover {
         text-decoration: underline;
       }
+
+      /* Utility class for screen readers only */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
     </style>
   </head>
   <body>
-    <!-- Navigation Bar -->
-    <!-- Navigation Bar -->
     <nav class="navbar">
-      <a href="#" class="logo">Smart Price Comparator</a>
+      <a href="#" class="logo">SmartPrice</a>
       <ul class="nav-links">
         <li>
           <a href="https://witchakornb.github.io/witchakornb/" target="_blank"
-            >->Home: WitchakornB</a
+            >witchakornb.github.io</a
           >
         </li>
         <li>
@@ -297,7 +407,6 @@
             >24 Game Solver</a
           >
         </li>
-        <!-- สามารถเพิ่มลิงก์อื่นๆ ได้ที่นี่ -->
       </ul>
     </nav>
 
@@ -305,32 +414,39 @@
       <div class="card">
         <div class="card-header">
           <h1>เครื่องคำนวณเปรียบเทียบราคา</h1>
-          <p>ค้นหาสินค้าที่คุ้มค่าที่สุด</p>
+          <p>ค้นหาสินค้าที่คุ้มค่าที่สุด ประหยัดกว่าเห็นๆ</p>
         </div>
 
         <div class="card-content">
-          <!-- รายการสินค้า -->
-          <div class="product-list" id="productList"></div>
+          <div id="errorMessageArea" class="error-message-area hidden"></div>
 
-          <!-- ปุ่มเพิ่ม / คำนวณ -->
+          <div class="product-list" id="productList">
+            <!-- Product items will be dynamically added here -->
+          </div>
+
           <div class="button-group">
             <button class="btn-outline" id="addProduct">
-              <span>＋</span>เพิ่มสินค้า
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"  aria-hidden="true">
+                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5V4.75z" />
+              </svg>
+              เพิ่มสินค้า
             </button>
             <button class="btn-primary" id="calculate">
-              <span>≡</span>คำนวณ
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm2.678-9.644a.75.75 0 00-1.06-1.06L10.5 8.44l-1.118-1.119a.75.75 0 00-1.06 1.061l1.65 1.649a.75.75 0 001.06 0l2.148-2.147z" clip-rule="evenodd" /> <!-- Using a check-circle like icon, implies ready to calc -->
+              </svg>
+              คำนวณ
             </button>
           </div>
 
-          <!-- ผลลัพธ์ -->
-          <div class="results" id="results">
-            <h2>ผลลัพธ์</h2>
+          <div class="results" id="results" aria-live="polite">
+            <h2><span aria-hidden="true">📊</span> ผลลัพธ์การเปรียบเทียบ</h2>
             <table>
               <thead>
                 <tr>
-                  <th>แบรนด์</th>
-                  <th>ราคาต่อหน่วย (บาท)</th>
-                  <th>ความคุ้มค่า</th>
+                  <th>แบรนด์สินค้า</th>
+                  <th>ราคาต่อหน่วย</th>
+                  <th>สถานะความคุ้มค่า</th>
                 </tr>
               </thead>
               <tbody id="resultsBody"></tbody>
@@ -339,21 +455,27 @@
             <div class="summary" id="summary"></div>
             <div class="recommendation" id="recommendation"></div>
 
-            <!-- ปุ่ม Copy -->
-            <button class="btn-copy" id="copyResults">Copy Results</button>
+            <div style="text-align: center;"> <!-- Wrapper for centering button -->
+                <button class="btn-copy" id="copyResults">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M15.906 4.344A1.5 1.5 0 0014.5 3H6.5a1.5 1.5 0 00-1.406 1.094L3.75 8.25H2a1 1 0 00-1 1v6a1 1 0 001 1h16a1 1 0 001-1V9.25a1 1 0 00-1-1h-1.75l-1.344-3.906zM6.5 4.5a.5.5 0 01.469-.312l1.343 3.906A2.501 2.501 0 0010.25 10h-.5a2.5 2.5 0 001.938-3.812L13.031 4.188A.5.5 0 0113.5 4.5h1 .5V6h-11V4.5h1z" clip-rule="evenodd" />
+                        <path d="M5.25 11.25a.75.75 0 000 1.5h9.5a.75.75 0 000-1.5h-9.5z" />
+                    </svg>
+                    คัดลอกผลสรุป
+                </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer -->
       <footer>
         <p>
-          © 2025
+          © 2024
           <a
             href="https://github.com/witchakornb/Smart-Price-Comparator"
             target="_blank"
             >Smart Price Comparator</a
-          >. All rights reserved.
+          > by WitchakornB. All rights reserved.
         </p>
       </footer>
     </div>
@@ -364,106 +486,140 @@
         const addProductBtn = document.getElementById("addProduct");
         const calculateBtn = document.getElementById("calculate");
         const copyResultsBtn = document.getElementById("copyResults");
-        const results = document.getElementById("results");
+        const resultsSection = document.getElementById("results");
         const resultsBody = document.getElementById("resultsBody");
-        const summary = document.getElementById("summary");
-        const recommendation = document.getElementById("recommendation");
+        const summaryDiv = document.getElementById("summary");
+        const recommendationDiv = document.getElementById("recommendation");
+        const errorMessageArea = document.getElementById("errorMessageArea");
 
         let productCount = 0;
+        const originalCopyBtnText = copyResultsBtn.innerHTML;
 
-        /**
-         * createProductItem
-         * สร้าง <div class="product-item"> พร้อมช่องกรอกข้อมูลแบรนด์ ราคา จำนวน
-         * และปุ่มลบ (btn-delete)
-         */
+        function showErrorMessage(message) {
+            errorMessageArea.textContent = message;
+            errorMessageArea.classList.remove('hidden');
+        }
+
+        function clearErrorMessage() {
+            errorMessageArea.classList.add('hidden');
+            errorMessageArea.textContent = '';
+        }
+
+
         function createProductItem() {
           productCount++;
           const div = document.createElement("div");
           div.className = "product-item";
           div.innerHTML = `
-          <div class="input-group">
-            <label>ชื่อแบรนด์</label>
-            <input type="text" class="brand" value="Product ${productCount}">
-          </div>
-          <div class="input-group">
-            <label>ราคา</label>
-            <input type="number" class="price" placeholder="0" min="0" step="0.01">
-          </div>
-          <div class="input-group">
-            <label>จำนวน</label>
-            <input type="number" class="quantity" placeholder="1" min="1">
-          </div>
-          <button class="btn-delete" onclick="removeProduct(this)">✕</button>
-        `;
+            <div class="input-group">
+              <label for="brand-${productCount}">ชื่อแบรนด์</label>
+              <input type="text" id="brand-${productCount}" class="brand" value="สินค้า ${productCount}" placeholder="เช่น โค้ก, เป๊ปซี่">
+            </div>
+            <div class="input-group">
+              <label for="price-${productCount}">ราคา (บาท)</label>
+              <input type="number" id="price-${productCount}" class="price" placeholder="เช่น 50" min="0.01" step="0.01">
+            </div>
+            <div class="input-group">
+              <label for="quantity-${productCount}">จำนวน (หน่วย)</label>
+              <input type="number" id="quantity-${productCount}" class="quantity" placeholder="เช่น 1.5 (ลิตร), 6 (กระป๋อง)" min="1" step="any">
+            </div>
+            <button type="button" class="btn-delete" aria-label="ลบสินค้ารายการนี้">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.177-2.34.294a.75.75 0 00-.512 1.064l.162.285a.75.75 0 00.874.447l.02-.006a25.046 25.046 0 014.362-.254V15.5A2.5 2.5 0 0010.75 18h3.5A2.5 2.5 0 0016.75 15.5V6.25a.75.75 0 00-.75-.75h-.599A25.046 25.046 0 0111.25 5V3.75A2.75 2.75 0 008.75 1zm-.25 2.75V5h3V3.75a1.25 1.25 0 00-1.25-1.25h-.5A1.25 1.25 0 008.5 3.75z" clip-rule="evenodd" />
+              </svg>
+              <span class="sr-only">ลบ</span>
+            </button>
+          `;
+          // Set focus to the new brand input for better UX
+          setTimeout(() => {
+            const firstInput = div.querySelector('input.brand');
+            if (firstInput) firstInput.focus();
+          },0);
           return div;
         }
 
-        /**
-         * addProduct
-         * เพิ่มสินค้าใหม่ 1 รายการ ลงใน productList
-         */
         function addProduct() {
+          clearErrorMessage();
           productList.appendChild(createProductItem());
+          // Ensure results are hidden if new products are added after calculation
+          resultsSection.classList.remove("show");
         }
 
-        /**
-         * removeProduct
-         * ลบ <div class="product-item"> ตัวนั้น
-         * ฟังก์ชันนี้ถูก expose ไว้บน window เพื่อให้งานผ่าน onclick
-         */
-        window.removeProduct = function (button) {
-          button.parentElement.remove();
-        };
+        // Event delegation for removing product items
+        productList.addEventListener('click', function(event) {
+            const deleteButton = event.target.closest('.btn-delete');
+            if (deleteButton) {
+                deleteButton.closest('.product-item').remove();
+                if (productList.children.length === 0) { // If all items removed
+                    resultsSection.classList.remove("show");
+                    clearErrorMessage();
+                }
+            }
+        });
 
-        /**
-         * calculate
-         * ฟังก์ชันหลักในการคำนวณ
-         * 1) อ่านค่าจากทุก product-item
-         * 2) ตรวจสอบความถูกต้อง (brand != '', price>0, quantity>0)
-         * 3) หา Best Value / Next Best Value
-         * 4) แสดงผลในตารางตามลำดับที่ผู้ใช้กรอก
-         * 5) สรุปผลใน summary / recommendation
-         */
+
         function calculate() {
+          clearErrorMessage();
           const items = document.querySelectorAll(".product-item");
           const products = [];
+          let hasError = false;
 
-          // 1) เก็บข้อมูลตามลำดับ
-          items.forEach((item) => {
-            const brand = item.querySelector(".brand").value.trim();
-            const price = parseFloat(item.querySelector(".price").value);
-            const quantity = parseFloat(item.querySelector(".quantity").value);
+          items.forEach((item, index) => {
+            const brandInput = item.querySelector(".brand");
+            const priceInput = item.querySelector(".price");
+            const quantityInput = item.querySelector(".quantity");
 
-            if (
-              brand &&
-              !isNaN(price) &&
-              price > 0 &&
-              !isNaN(quantity) &&
-              quantity > 0
-            ) {
+            const brand = brandInput.value.trim();
+            const price = parseFloat(priceInput.value);
+            const quantity = parseFloat(quantityInput.value);
+
+            // Basic validation styling
+            [brandInput, priceInput, quantityInput].forEach(input => input.style.borderColor = ''); // Reset border
+
+            if (!brand) {
+                brandInput.style.borderColor = 'var(--error-color)';
+                hasError = true;
+            }
+            if (isNaN(price) || price <= 0) {
+                priceInput.style.borderColor = 'var(--error-color)';
+                hasError = true;
+            }
+            if (isNaN(quantity) || quantity <= 0) {
+                quantityInput.style.borderColor = 'var(--error-color)';
+                hasError = true;
+            }
+
+            if (brand && !isNaN(price) && price > 0 && !isNaN(quantity) && quantity > 0) {
               products.push({
                 brand,
                 price,
                 quantity,
                 unitPrice: price / quantity,
+                originalIndex: index // Keep original order for display
               });
             }
           });
 
-          // ถ้าไม่มีสินค้าที่กรอกครบถ้วน
-          if (products.length === 0) {
-            alert("กรุณากรอกข้อมูลสินค้าให้ถูกต้อง");
+          if (hasError) {
+            showErrorMessage("กรุณากรอกข้อมูลสินค้าให้ถูกต้องทุกช่อง (ชื่อแบรนด์, ราคามากกว่า 0, จำนวนมากกว่า 0)");
+            resultsSection.classList.remove("show");
             return;
           }
 
-          // 2) Sort แยก (แต่ไม่ใช้เรียงในตาราง) เพื่อหา Best/Next
+          if (products.length === 0) {
+            showErrorMessage("กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการและกรอกข้อมูลให้ครบถ้วน");
+            resultsSection.classList.remove("show");
+            return;
+          }
+
           const sortedByUnitPrice = [...products].sort(
             (a, b) => a.unitPrice - b.unitPrice
           );
-          const bestValue = sortedByUnitPrice[0];
-          const bestPrice = bestValue.unitPrice; // ราคาต่อหน่วยต่ำสุด
+
+          const bestValueProduct = sortedByUnitPrice[0];
+          const bestPrice = bestValueProduct.unitPrice;
           let nextBestPrice = null;
-          // ค้นหา nextBest (ตัวที่มี unitPrice > bestPrice)
+
           for (let i = 1; i < sortedByUnitPrice.length; i++) {
             if (sortedByUnitPrice[i].unitPrice > bestPrice) {
               nextBestPrice = sortedByUnitPrice[i].unitPrice;
@@ -471,18 +627,18 @@
             }
           }
 
-          // 3) แสดงผลในตาราง ตาม "ลำดับที่กรอก"
           resultsBody.innerHTML = "";
-          products.forEach((prod) => {
+          // Display products in their original input order
+          const displayProducts = [...products].sort((a,b) => a.originalIndex - b.originalIndex);
+
+          displayProducts.forEach((prod) => {
             let rowClass = "";
-            let valueText = "";
+            let valueText = "-";
 
             if (prod.unitPrice === bestPrice) {
-              // unitPrice เท่ากับ BestValue
               rowClass = "best-value";
               valueText = "คุ้มค่าที่สุด";
             } else if (nextBestPrice && prod.unitPrice === nextBestPrice) {
-              // unitPrice = nextBestPrice
               rowClass = "next-best-value";
               valueText = "คุ้มค่าลำดับถัดมา";
             }
@@ -490,106 +646,101 @@
             const row = document.createElement("tr");
             row.className = rowClass;
             row.innerHTML = `
-            <td>${prod.brand}</td>
-            <td>THB ${prod.unitPrice.toFixed(2)}</td>
-            <td>${valueText}</td>
-          `;
+              <td>${prod.brand}</td>
+              <td>${prod.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</td>
+              <td>${valueText}</td>
+            `;
             resultsBody.appendChild(row);
           });
 
-          // 4) สร้างข้อความสรุปและคำแนะนำ
-          // (อาจมีหลายตัวที่เป็น Best Value ถ้า unitPrice เท่ากับ bestPrice)
-          const bestValueItems = sortedByUnitPrice.filter(
-            (p) => p.unitPrice === bestPrice
-          );
-          const bestNames = bestValueItems.map((p) => p.brand).join(", ");
-          summary.innerHTML = `
-          <p>
-            แบรนด์ที่คุ้มค่าที่สุดคือ 
-            <strong>${bestNames}</strong>
-            ด้วยราคาต่อหน่วย <strong>${bestPrice.toFixed(2)}</strong> บาท
-          </p>
-        `;
+          const bestValueItems = sortedByUnitPrice.filter(p => p.unitPrice === bestPrice);
+          const bestNames = bestValueItems.map(p => p.brand).join(" และ ");
+          summaryDiv.innerHTML = `
+            <p>
+              แบรนด์ที่ <strong>คุ้มค่าที่สุด</strong> คือ <strong>${bestNames}</strong>
+              ด้วยราคาต่อหน่วย <strong>${bestPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท
+            </p>
+          `;
 
-          // เลือกตัวแรกในกรณีหลาย Best Value
-          const mainBest = bestValueItems[0];
+          const mainBest = bestValueItems[0]; // Use the first one for detailed recommendation
           let recommendationHTML = `
-          <p>
-            หากคุณซื้อ <strong>${mainBest.quantity}</strong> หน่วย
-            ของ <strong>${mainBest.brand}</strong>
-            รวมเป็นเงิน <strong>${mainBest.price.toFixed(2)}</strong> บาท
-          </p>
-        `;
+            <p>
+              หากคุณซื้อ <strong>${mainBest.quantity.toLocaleString()}</strong> หน่วยของ <strong>${mainBest.brand}</strong>
+              คุณจะจ่ายทั้งหมด <strong>${mainBest.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท
+            </p>
+          `;
 
-          // หา Next Best (ตัวถัดไปที่ unitPrice > bestPrice)
           if (nextBestPrice) {
-            const nextBestItem = sortedByUnitPrice.find(
-              (p) => p.unitPrice === nextBestPrice
-            );
-            const diffPerUnit = nextBestItem.unitPrice - mainBest.unitPrice;
-            const diffTotal = diffPerUnit * mainBest.quantity;
+            const nextBestItems = sortedByUnitPrice.filter(p => p.unitPrice === nextBestPrice);
+            if (nextBestItems.length > 0) {
+                const nextBestItem = nextBestItems[0]; // Take the first one if multiple next-bests
+                const diffPerUnit = nextBestItem.unitPrice - mainBest.unitPrice;
+                
+                if (diffPerUnit > 0) { // Only show comparison if truly more expensive
+                    const savingsPerUnitForBest = diffPerUnit;
+                    const totalSavingsForBest = savingsPerUnitForBest * mainBest.quantity;
 
-            if (diffPerUnit === 0) {
-              // เท่ากับ Best Value อีก
-              recommendationHTML += `
-              <p>
-                นอกจากนี้ <strong>${nextBestItem.brand}</strong> 
-                ก็มีราคาต่อหน่วยเท่ากัน เลือกแบรนด์ใดก็จ่ายเท่ากัน!
-              </p>
-            `;
-            } else {
-              // มีความแตกต่างจริง
-              recommendationHTML += `
-              <p>
-                ส่วน <strong>${nextBestItem.brand}</strong> (คุ้มค่าลำดับถัดมา)
-                มีราคาต่อหน่วย <strong>${nextBestItem.unitPrice.toFixed(
-                  2
-                )}</strong> บาท
-                <br/>
-                แบรนด์ <strong>${mainBest.brand}</strong>
-                ถูกกว่า <strong>THB ${diffPerUnit.toFixed(2)}</strong> ต่อหน่วย
-                <br/>
-                หากซื้อ ${mainBest.quantity} หน่วย จะประหยัดได้ 
-                <strong>THB ${diffTotal.toFixed(2)}</strong>
-              </p>
-            `;
+                    recommendationHTML += `
+                    <p>
+                        เมื่อเทียบกับ <strong>${nextBestItem.brand}</strong> (ราคาต่อหน่วย ${nextBestItem.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท),
+                        การเลือก <strong>${mainBest.brand}</strong> จะช่วยให้คุณประหยัดได้
+                        <strong>${savingsPerUnitForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาทต่อหน่วย.
+                    </p>
+                    <p>
+                        หากซื้อจำนวน <strong>${mainBest.quantity.toLocaleString()}</strong> หน่วยเท่ากัน,
+                        คุณจะประหยัดเงินได้ถึง <strong>${totalSavingsForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท.
+                    </p>
+                    `;
+                }
             }
-          } else {
-            // ไม่มีตัวถัดมา (สินค้าทั้งหมดอาจราคาต่อหน่วยเท่ากัน หรือมีแค่ 1 รายการ)
-            if (bestValueItems.length === 1) {
-              recommendationHTML += `<p>คุณมีตัวเลือกเดียวในรายการนี้!</p>`;
-            } else {
-              recommendationHTML += `<p>สินค้าทั้งหมดคุ้มค่าเท่ากัน!</p>`;
-            }
+          } else if (products.length > 1 && bestValueItems.length === products.length) {
+            recommendationHTML += `<p>สินค้าทุกรายการในรายการนี้มีความคุ้มค่าเท่ากัน!</p>`;
+          } else if (products.length === 1) {
+             recommendationHTML += `<p>คุณมีสินค้าเพียงรายการเดียวให้พิจารณา</p>`;
           }
 
-          recommendation.innerHTML = recommendationHTML;
-          results.classList.add("show");
+
+          recommendationDiv.innerHTML = recommendationHTML;
+          resultsSection.classList.add("show");
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // ฟังก์ชันคัดลอกผลลัพธ์ไปยังคลิปบอร์ด
         copyResultsBtn.addEventListener("click", () => {
-          const summaryText = summary.textContent.replace(/\s+/g, " ").trim();
-          const recommendationText = recommendation.textContent
-            .replace(/\s+/g, " ")
-            .trim();
-          const fullText = `${summaryText}\n${recommendationText}`;
-          navigator.clipboard
-            .writeText(fullText)
+          const tableRows = Array.from(resultsBody.querySelectorAll("tr"));
+          let tableText = "ผลการเปรียบเทียบราคา:\n";
+          tableRows.forEach(row => {
+              const cells = Array.from(row.querySelectorAll("td"));
+              tableText += `${cells[0].textContent} | ราคาต่อหน่วย: ${cells[1].textContent} | ${cells[2].textContent}\n`;
+          });
+
+          const summaryText = summaryDiv.textContent.replace(/\s+/g, " ").trim();
+          const recommendationText = recommendationDiv.textContent.replace(/\s+/g, " ").trim();
+          
+          const fullText = `${tableText}\nสรุป:\n${summaryText}\n\nคำแนะนำเพิ่มเติม:\n${recommendationText}`;
+          
+          navigator.clipboard.writeText(fullText)
             .then(() => {
-              alert("ผลลัพธ์ถูกคัดลอกไปยังคลิปบอร์ดแล้ว!");
+              copyResultsBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
+                </svg>
+                คัดลอกแล้ว!`;
+              copyResultsBtn.classList.add('copied');
+              setTimeout(() => {
+                copyResultsBtn.innerHTML = originalCopyBtnText;
+                copyResultsBtn.classList.remove('copied');
+              }, 2500);
             })
             .catch((err) => {
-              alert("ไม่สามารถคัดลอกผลลัพธ์ได้ กรุณาลองใหม่อีกครั้ง");
+              showErrorMessage("ไม่สามารถคัดลอกผลลัพธ์ได้: " + err);
               console.error("Error copying text: ", err);
             });
         });
 
-        // Event listeners
         addProductBtn.addEventListener("click", addProduct);
         calculateBtn.addEventListener("click", calculate);
 
-        // เพิ่มสินค้าตั้งต้น 2 รายการ
+        // Add initial product items
         addProduct();
         addProduct();
       });
