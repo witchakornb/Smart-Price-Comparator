@@ -4,462 +4,120 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>เครื่องคำนวณเปรียบเทียบราคา</title>
-    <style>
-      :root {
-        --primary-color: #3b82f6; /* Blue 500 */
-        --primary-dark: #2563eb; /* Blue 600 */
-        --primary-light: #60a5fa; /* Blue 400 */
-        --background-color: #f3f4f6; /* Gray 100 */
-        --card-background: #ffffff;
-        --text-color: #1f2937; /* Gray 800 */
-        --text-secondary-color: #4b5563; /* Gray 600 */
-        --border-color: #d1d5db; /* Gray 300 */
-        --error-color: #ef4444; /* Red 500 */
-        --success-color: #10b981; /* Green 500 */
-        --nav-height: 60px;
-        --border-radius-sm: 4px;
-        --border-radius-md: 8px;
-        --border-radius-lg: 12px;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Optional: You can customize Tailwind here if needed
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: { // Custom primary color matching your old theme
+                DEFAULT: '#3b82f6', // blue-500
+                dark: '#2563eb',   // blue-600
+                light: '#60a5fa',  // blue-400
+              },
+            }
+          }
+        }
       }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+    </script>
+    <style>
+      /* For any minor custom styles Tailwind doesn't cover easily */
+      body {
         font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
           "Segoe UI Emoji", "Segoe UI Symbol";
+        padding-top: 60px; /* Corresponds to nav-height */
       }
-
-      body {
-        background-color: var(--background-color);
-        color: var(--text-color);
-        line-height: 1.6;
-        padding-top: var(--nav-height);
-        font-size: 16px;
-      }
-
-      /* Navigation Bar */
-      .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: var(--nav-height);
-        background-color: var(--primary-color);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 2rem;
-        z-index: 1000;
-        box-shadow: var(--shadow-md);
-      }
-      .navbar .logo {
-        color: #fff;
-        font-size: 1.5rem;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .navbar .nav-links {
-        list-style: none;
-        display: flex;
-        gap: 1.5rem;
-      }
-      .navbar .nav-links a {
-        color: #fff;
-        text-decoration: none;
-        font-size: 1rem;
-        transition: color 0.2s ease-in-out;
-      }
-      .navbar .nav-links a:hover {
-        color: #dbeafe; /* Blue 200 for hover */
-      }
-
-      .container {
-        max-width: 900px; /* Slightly reduced for better focus */
-        margin: 2rem auto; /* Added top margin */
-        padding: 0 1rem; /* Padding for smaller screens */
-        position: relative;
-      }
-
-      .card {
-        background: var(--card-background);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-      }
-
-      .card-header {
-        background: linear-gradient(
-          135deg,
-          var(--primary-color) 0%,
-          var(--primary-dark) 100%
-        );
-        color: #fff;
-        text-align: center;
-        padding: 2rem 1.5rem;
-      }
-      .card-header h1 {
-        font-size: 2.25rem; /* Increased size */
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-      }
-      .card-header p {
-        opacity: 0.9;
-        font-size: 1.125rem;
-      }
-
-      .card-content {
-        padding: 2rem;
-      }
-
-      /* Error Message Area */
-      .error-message-area {
-        background-color: rgba(239, 68, 68, 0.1); /* error-color with opacity */
-        color: var(--error-color);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        padding: 1rem;
-        border-radius: var(--border-radius-md);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        font-weight: 500;
-      }
-      .error-message-area.hidden {
-          display: none;
-      }
-
-
-      /* Product List */
-      .product-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem; /* Increased gap */
-      }
-      .product-item {
-        display: grid;
-        grid-template-columns: 3fr 2fr 2fr auto; /* Adjusted column proportions */
-        gap: 1rem;
-        padding: 1.25rem;
-        background: #f9fafb; /* Gray 50 */
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-md);
-        transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-        align-items: flex-end; /* Align to bottom for button */
-      }
-      .product-item:hover {
-        border-color: var(--primary-light);
-        box-shadow: var(--shadow-sm);
-      }
-
-      @media (max-width: 768px) {
-        .product-item {
-          grid-template-columns: 1fr; /* Stack on mobile */
-          gap: 1rem;
-        }
-        .product-item .btn-delete {
-            margin-top: 0.5rem; /* Add some space when stacked */
-            width: 100%;
-        }
-      }
-
-      .input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-      }
-      .input-group label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--text-secondary-color);
-      }
-      input[type="text"],
-      input[type="number"] {
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-md);
-        font-size: 1rem;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        background-color: #fff;
-      }
-      input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      }
-      input::placeholder {
-        color: #9ca3af; /* Gray 400 */
-      }
-
-      /* Buttons */
-      .button-group {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 2.5rem; /* Increased margin */
-        margin-bottom: 1rem;
-      }
-      button {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: var(--border-radius-md);
-        font-weight: 500;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        display: inline-flex; /* For icon alignment */
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: var(--shadow-sm);
-      }
-      button svg {
-        width: 1.1em;
-        height: 1.1em;
-      }
-
-      .btn-primary {
-        background-color: var(--primary-color);
-        color: #fff;
-      }
-      .btn-primary:hover {
-        background-color: var(--primary-dark);
-        box-shadow: var(--shadow-md);
-      }
-      .btn-outline {
-        background-color: transparent;
-        border: 1px solid var(--primary-color);
-        color: var(--primary-color);
-      }
-      .btn-outline:hover {
-        background-color: var(--primary-color);
-        color: #fff;
-        box-shadow: var(--shadow-md);
-      }
-      .btn-copy {
-        padding: 0.65rem 1.25rem; /* Slightly smaller */
-        background-color: var(--success-color);
-        color: #fff;
-        margin-top: 1.5rem; /* Space from recommendation */
-      }
-      .btn-copy:hover {
-        background-color: #059669; /* Darker success */
-        box-shadow: var(--shadow-md);
-      }
-      .btn-copy.copied {
-        background-color: #047857; /* Even darker green */
-      }
-      .btn-delete {
-        padding: 0.6rem; /* Adjusted for icon button */
-        background-color: var(--error-color);
-        color: #fff;
-        line-height: 1; /* For icon centering */
-      }
-      .btn-delete:hover {
-        background-color: #dc2626; /* Darker error */
-        opacity: 1;
-        box-shadow: var(--shadow-md);
-      }
-      .btn-delete svg {
-        margin: auto; /* Center icon if button has padding */
-      }
-
-
-      /* Results Section */
-      .results {
-        margin-top: 2.5rem;
-        display: none;
-        opacity: 0;
-        transform: translateY(20px);
+      /* Custom transition for results section if needed beyond Tailwind's capabilities */
+      .results-transition {
         transition: opacity 0.5s ease-out, transform 0.5s ease-out;
       }
-      .results.show {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .results h2 {
-        font-size: 1.75rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: var(--primary-dark);
-        text-align: center;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1.5rem;
-        box-shadow: var(--shadow-md);
-        border-radius: var(--border-radius-md);
-        overflow: hidden; /* For border-radius on table */
-      }
-      th, td {
-        border: 1px solid var(--border-color);
-        padding: 1rem 1.25rem;
-        text-align: left;
-        vertical-align: middle;
-      }
-      th {
-        background-color: #e5e7eb; /* Gray 200 */
-        font-weight: 600;
-        color: var(--text-secondary-color);
-      }
-      td {
-        background-color: var(--card-background);
-      }
-      tr.best-value td {
-        background-color: rgba(16, 185, 129, 0.08); /* Lighter success */
-        font-weight: 500;
-      }
-      tr.best-value td:first-child::before {
-        content: "🏆 ";
-      }
-      tr.next-best-value td {
-        background-color: rgba(59, 130, 246, 0.08); /* Lighter primary */
-      }
-       tr.next-best-value td:first-child::before {
-        content: "🥈 ";
-      }
-
-
-      .summary {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background-color: rgba(59, 130, 246, 0.05); /* Very light primary */
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: var(--border-radius-md);
-        text-align: center;
-        font-size: 1.125rem;
-      }
-      .summary strong {
-        color: var(--primary-dark);
-        font-weight: 600;
-      }
-      .recommendation {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        font-size: 1rem;
-        line-height: 1.7;
-        text-align: center;
-        color: var(--text-secondary-color);
-        background-color: #f9fafb; /* Gray 50 */
-        border-radius: var(--border-radius-md);
-      }
-      .recommendation strong {
-          color: var(--text-color);
-          font-weight: 600;
-      }
-      .recommendation p {
-        margin-bottom: 0.75rem;
-      }
-      .recommendation p:last-child {
-        margin-bottom: 0;
-      }
-
-
-      /* Footer */
-      footer {
-        margin-top: 3rem;
-        text-align: center;
-        font-size: 0.875rem;
-        padding: 1.5rem 0;
-        background-color: var(--card-background);
-        border-top: 1px solid var(--border-color);
-        color: var(--text-secondary-color);
-      }
-      footer a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-      }
-      footer a:hover {
-        text-decoration: underline;
-      }
-
-      /* Utility class for screen readers only */
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border-width: 0;
+      .input-number-placeholder::placeholder { /* For more specific number placeholder styling if needed */
+        color: #9ca3af; /* Tailwind gray-400 */
       }
     </style>
   </head>
-  <body>
-    <nav class="navbar">
-      <a href="#" class="logo">SmartPrice</a>
-      <ul class="nav-links">
+  <body class="bg-gray-100 text-gray-800 antialiased">
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full h-[60px] bg-primary shadow-md flex items-center justify-between px-4 sm:px-8 z-50">
+      <a href="https://witchakornb.github.io/" class="text-white text-xl sm:text-2xl font-semibold hover:opacity-80 transition-opacity">SmartPrice</a>
+      <ul class="flex space-x-4 sm:space-x-6">
         <li>
-          <a href="https://witchakornb.github.io/witchakornb/" target="_blank"
-            >witchakornb.github.io</a
-          >
+          <a href="https://witchakornb.github.io/witchakornb/" target="_blank" class="text-white text-sm sm:text-base hover:text-primary-light transition-colors">
+            witchakornb.io
+          </a>
         </li>
         <li>
-          <a
-            href="https://witchakornb.github.io/24-game-solver/"
-            target="_blank"
-            >24 Game Solver</a
-          >
+          <a href="https://witchakornb.github.io/24-game-solver/" target="_blank" class="text-white text-sm sm:text-base hover:text-primary-light transition-colors">
+            24 Game Solver
+          </a>
         </li>
       </ul>
     </nav>
 
-    <div class="container">
-      <div class="card">
-        <div class="card-header">
-          <h1>เครื่องคำนวณเปรียบเทียบราคา</h1>
-          <p>ค้นหาสินค้าที่คุ้มค่าที่สุด ประหยัดกว่าเห็นๆ</p>
+    <div class="container max-w-3xl mx-auto p-4 mt-8 mb-8">
+      <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-br from-primary to-primary-dark text-white text-center p-6 sm:p-8">
+          <h1 class="text-2xl sm:text-3xl font-bold mb-2">เครื่องคำนวณเปรียบเทียบราคา</h1>
+          <p class="text-base sm:text-lg opacity-90">ค้นหาสินค้าที่คุ้มค่าที่สุด ประหยัดกว่าเห็นๆ</p>
         </div>
 
-        <div class="card-content">
-          <div id="errorMessageArea" class="error-message-area hidden"></div>
-
-          <div class="product-list" id="productList">
-            <!-- Product items will be dynamically added here -->
+        <div class="p-6 sm:p-8">
+          <div id="errorMessageArea" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6 hidden" role="alert">
+            {/* Error messages will appear here */}
           </div>
 
-          <div class="button-group">
-            <button class="btn-outline" id="addProduct">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"  aria-hidden="true">
+          <div class="product-list space-y-6" id="productList">
+            {/* Product items will be dynamically added here */}
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8 mb-6">
+            <button class="btn-outline group" id="addProduct">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 transition-transform group-hover:rotate-90">
                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5V4.75z" />
               </svg>
               เพิ่มสินค้า
             </button>
             <button class="btn-primary" id="calculate">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm2.678-9.644a.75.75 0 00-1.06-1.06L10.5 8.44l-1.118-1.119a.75.75 0 00-1.06 1.061l1.65 1.649a.75.75 0 001.06 0l2.148-2.147z" clip-rule="evenodd" /> <!-- Using a check-circle like icon, implies ready to calc -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-4.75a.75.75 0 001.5 0V8.66l1.95 2.1a.75.75 0 101.1-1.02l-3.25-3.5a.75.75 0 00-1.1 0L6.2 9.74a.75.75 0 101.1 1.02l1.95-2.1v4.59z" clip-rule="evenodd" />
               </svg>
               คำนวณ
             </button>
           </div>
 
-          <div class="results" id="results" aria-live="polite">
-            <h2><span aria-hidden="true">📊</span> ผลลัพธ์การเปรียบเทียบ</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>แบรนด์สินค้า</th>
-                  <th>ราคาต่อหน่วย</th>
-                  <th>สถานะความคุ้มค่า</th>
-                </tr>
-              </thead>
-              <tbody id="resultsBody"></tbody>
-            </table>
+          {/* Results Section - initially hidden and animated in */}
+          <div class="results results-transition opacity-0 transform translate-y-5 mt-10 hidden" id="results" aria-live="polite">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-6 text-primary-dark text-center">
+              <span aria-hidden="true" class="mr-2">📊</span>ผลลัพธ์การเปรียบเทียบ
+            </h2>
+            <div class="overflow-x-auto shadow-md rounded-lg">
+              <table class="w-full min-w-full text-sm text-left text-gray-700">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
+                  <tr>
+                    <th scope="col" class="px-6 py-3">แบรนด์สินค้า</th>
+                    <th scope="col" class="px-6 py-3">ราคาต่อหน่วย</th>
+                    <th scope="col" class="px-6 py-3">สถานะความคุ้มค่า</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody" class="bg-white"></tbody>
+              </table>
+            </div>
 
-            <div class="summary" id="summary"></div>
-            <div class="recommendation" id="recommendation"></div>
+            <div class="summary mt-8 p-4 sm:p-6 bg-primary-light/10 border border-primary-light/30 rounded-lg text-center text-gray-700" id="summary">
+              {/* Summary content here */}
+            </div>
+            <div class="recommendation mt-6 p-4 text-gray-600 bg-gray-50 rounded-lg text-center space-y-2" id="recommendation">
+              {/* Recommendation content here */}
+            </div>
 
-            <div style="text-align: center;"> <!-- Wrapper for centering button -->
+            <div class="text-center mt-8">
                 <button class="btn-copy" id="copyResults">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M15.906 4.344A1.5 1.5 0 0014.5 3H6.5a1.5 1.5 0 00-1.406 1.094L3.75 8.25H2a1 1 0 00-1 1v6a1 1 0 001 1h16a1 1 0 001-1V9.25a1 1 0 00-1-1h-1.75l-1.344-3.906zM6.5 4.5a.5.5 0 01.469-.312l1.343 3.906A2.501 2.501 0 0010.25 10h-.5a2.5 2.5 0 001.938-3.812L13.031 4.188A.5.5 0 0113.5 4.5h1 .5V6h-11V4.5h1z" clip-rule="evenodd" />
-                        <path d="M5.25 11.25a.75.75 0 000 1.5h9.5a.75.75 0 000-1.5h-9.5z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path d="M15.502 1.94a.75.75 0 010 1.06L11.56 7.002H16.75a.75.75 0 010 1.5H11.56l3.942 3.942a.75.75 0 11-1.06 1.06L10 8.812l-4.442 4.442a.75.75 0 11-1.06-1.06L8.44 8.502H3.25a.75.75 0 010-1.5H8.44L4.5 3.002a.75.75 0 011.06-1.06L10 6.188l4.442-4.442a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                        <path d="M3.25 2.5a.75.75 0 00-.75.75v13.5a.75.75 0 00.75.75h13.5a.75.75 0 00.75-.75V9.25a.75.75 0 00-1.5 0v7.5H3.25v-13.5H10a.75.75 0 000-1.5H3.25z" />
                     </svg>
                     คัดลอกผลสรุป
                 </button>
@@ -468,17 +126,37 @@
         </div>
       </div>
 
-      <footer>
+      <footer class="mt-12 text-center text-xs sm:text-sm text-gray-500 py-6 border-t border-gray-200">
         <p>
-          © 2024
-          <a
-            href="https://github.com/witchakornb/Smart-Price-Comparator"
-            target="_blank"
-            >Smart Price Comparator</a
-          > by WitchakornB. All rights reserved.
+          © <span id="currentYear">2024</span>
+          <a href="https://github.com/witchakornb/Smart-Price-Comparator" target="_blank" class="text-primary hover:underline font-medium">Smart Price Comparator</a>
+          by WitchakornB. All rights reserved.
         </p>
       </footer>
     </div>
+
+    {/* Tailwind Helper CSS for buttons (can be inlined or in a <style> tag) */}
+    <style>
+      .btn-primary, .btn-outline, .btn-delete, .btn-copy {
+        @apply py-2.5 px-5 text-sm font-medium focus:outline-none rounded-lg border focus:z-10 focus:ring-4 inline-flex items-center justify-center gap-2 transition-all shadow-sm;
+      }
+      .btn-primary {
+        @apply text-white bg-primary hover:bg-primary-dark focus:ring-primary-light/50 border-primary;
+      }
+      .btn-outline {
+        @apply text-primary hover:text-white border-primary hover:bg-primary focus:ring-primary-light/50 bg-white;
+      }
+      .btn-delete {
+         @apply text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 border-red-600 p-2.5; /* More padding for icon button */
+      }
+      .btn-delete svg { @apply w-5 h-5; }
+      .btn-copy {
+        @apply text-white bg-green-600 hover:bg-green-700 focus:ring-green-300 border-green-600;
+      }
+      .btn-copy.copied {
+         @apply bg-green-700;
+      }
+    </style>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -491,9 +169,15 @@
         const summaryDiv = document.getElementById("summary");
         const recommendationDiv = document.getElementById("recommendation");
         const errorMessageArea = document.getElementById("errorMessageArea");
+        document.getElementById("currentYear").textContent = new Date().getFullYear();
+
 
         let productCount = 0;
         const originalCopyBtnText = copyResultsBtn.innerHTML;
+
+        const inputBaseClasses = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 input-number-placeholder';
+        const inputErrorClasses = 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500';
+
 
         function showErrorMessage(message) {
             errorMessageArea.textContent = message;
@@ -505,32 +189,31 @@
             errorMessageArea.textContent = '';
         }
 
-
         function createProductItem() {
           productCount++;
           const div = document.createElement("div");
-          div.className = "product-item";
+          // Added 'product-item-container' for easier targeting if needed, though not strictly necessary with Tailwind
+          div.className = "product-item-container bg-gray-50 p-4 sm:p-5 rounded-lg border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-[3fr_2fr_2fr_auto] gap-4 items-end";
           div.innerHTML = `
-            <div class="input-group">
-              <label for="brand-${productCount}">ชื่อแบรนด์</label>
-              <input type="text" id="brand-${productCount}" class="brand" value="สินค้า ${productCount}" placeholder="เช่น โค้ก, เป๊ปซี่">
+            <div>
+              <label for="brand-${productCount}" class="block mb-1.5 text-sm font-medium text-gray-700">ชื่อแบรนด์</label>
+              <input type="text" id="brand-${productCount}" class="brand ${inputBaseClasses}" value="สินค้า ${productCount}" placeholder="เช่น โค้ก, แบรนด์ A">
             </div>
-            <div class="input-group">
-              <label for="price-${productCount}">ราคา (บาท)</label>
-              <input type="number" id="price-${productCount}" class="price" placeholder="เช่น 50" min="0.01" step="0.01">
+            <div>
+              <label for="price-${productCount}" class="block mb-1.5 text-sm font-medium text-gray-700">ราคา (บาท)</label>
+              <input type="number" id="price-${productCount}" class="price ${inputBaseClasses}" placeholder="เช่น 50.00" min="0.01" step="0.01">
             </div>
-            <div class="input-group">
-              <label for="quantity-${productCount}">จำนวน (หน่วย)</label>
-              <input type="number" id="quantity-${productCount}" class="quantity" placeholder="เช่น 1.5 (ลิตร), 6 (กระป๋อง)" min="1" step="any">
+            <div>
+              <label for="quantity-${productCount}" class="block mb-1.5 text-sm font-medium text-gray-700">จำนวน (หน่วย)</label>
+              <input type="number" id="quantity-${productCount}" class="quantity ${inputBaseClasses}" placeholder="เช่น 1.5 (ลิตร), 6 (ชิ้น)" min="0.001" step="any">
             </div>
-            <button type="button" class="btn-delete" aria-label="ลบสินค้ารายการนี้">
+            <button type="button" class="btn-delete product-delete-btn" aria-label="ลบสินค้ารายการนี้">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.177-2.34.294a.75.75 0 00-.512 1.064l.162.285a.75.75 0 00.874.447l.02-.006a25.046 25.046 0 014.362-.254V15.5A2.5 2.5 0 0010.75 18h3.5A2.5 2.5 0 0016.75 15.5V6.25a.75.75 0 00-.75-.75h-.599A25.046 25.046 0 0111.25 5V3.75A2.75 2.75 0 008.75 1zm-.25 2.75V5h3V3.75a1.25 1.25 0 00-1.25-1.25h-.5A1.25 1.25 0 008.5 3.75z" clip-rule="evenodd" />
               </svg>
               <span class="sr-only">ลบ</span>
             </button>
           `;
-          // Set focus to the new brand input for better UX
           setTimeout(() => {
             const firstInput = div.querySelector('input.brand');
             if (firstInput) firstInput.focus();
@@ -541,26 +224,40 @@
         function addProduct() {
           clearErrorMessage();
           productList.appendChild(createProductItem());
-          // Ensure results are hidden if new products are added after calculation
-          resultsSection.classList.remove("show");
+          resultsSection.classList.add("opacity-0", "translate-y-5", "hidden");
+          resultsSection.classList.remove("opacity-100", "translate-y-0");
         }
 
-        // Event delegation for removing product items
         productList.addEventListener('click', function(event) {
-            const deleteButton = event.target.closest('.btn-delete');
+            const deleteButton = event.target.closest('.product-delete-btn');
             if (deleteButton) {
-                deleteButton.closest('.product-item').remove();
-                if (productList.children.length === 0) { // If all items removed
-                    resultsSection.classList.remove("show");
+                deleteButton.closest('.product-item-container').remove();
+                if (productList.children.length === 0) {
+                    resultsSection.classList.add("opacity-0", "translate-y-5", "hidden");
+                    resultsSection.classList.remove("opacity-100", "translate-y-0");
                     clearErrorMessage();
                 }
             }
         });
 
+        function setInputValid(inputElement) {
+            inputErrorClasses.split(' ').forEach(cls => inputElement.classList.remove(cls));
+            inputBaseClasses.split(' ').forEach(cls => { // Ensure base classes are there
+                if (!inputElement.classList.contains(cls)) inputElement.classList.add(cls);
+            });
+        }
+
+        function setInputError(inputElement) {
+            inputBaseClasses.split(' ').forEach(cls => inputElement.classList.remove(cls));
+            inputErrorClasses.split(' ').forEach(cls => {
+                 if (!inputElement.classList.contains(cls)) inputElement.classList.add(cls);
+            });
+        }
+
 
         function calculate() {
           clearErrorMessage();
-          const items = document.querySelectorAll(".product-item");
+          const items = document.querySelectorAll(".product-item-container"); // Changed selector
           const products = [];
           let hasError = false;
 
@@ -573,49 +270,46 @@
             const price = parseFloat(priceInput.value);
             const quantity = parseFloat(quantityInput.value);
 
-            // Basic validation styling
-            [brandInput, priceInput, quantityInput].forEach(input => input.style.borderColor = ''); // Reset border
+            setInputValid(brandInput);
+            setInputValid(priceInput);
+            setInputValid(quantityInput);
 
             if (!brand) {
-                brandInput.style.borderColor = 'var(--error-color)';
-                hasError = true;
+                setInputError(brandInput); hasError = true;
             }
             if (isNaN(price) || price <= 0) {
-                priceInput.style.borderColor = 'var(--error-color)';
-                hasError = true;
+                setInputError(priceInput); hasError = true;
             }
             if (isNaN(quantity) || quantity <= 0) {
-                quantityInput.style.borderColor = 'var(--error-color)';
-                hasError = true;
+                setInputError(quantityInput); hasError = true;
             }
 
-            if (brand && !isNaN(price) && price > 0 && !isNaN(quantity) && quantity > 0) {
+            if (!hasError && brand && !isNaN(price) && price > 0 && !isNaN(quantity) && quantity > 0) {
               products.push({
-                brand,
-                price,
-                quantity,
+                brand, price, quantity,
                 unitPrice: price / quantity,
-                originalIndex: index // Keep original order for display
+                originalIndex: index
               });
+            } else if (hasError && products.length > 0 && index === items.length -1) {
+                // If an error occurs, ensure we clear any previously collected products if this error means no valid products overall
             }
           });
 
           if (hasError) {
             showErrorMessage("กรุณากรอกข้อมูลสินค้าให้ถูกต้องทุกช่อง (ชื่อแบรนด์, ราคามากกว่า 0, จำนวนมากกว่า 0)");
-            resultsSection.classList.remove("show");
+            resultsSection.classList.add("opacity-0", "translate-y-5", "hidden");
+            resultsSection.classList.remove("opacity-100", "translate-y-0");
             return;
           }
 
           if (products.length === 0) {
             showErrorMessage("กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการและกรอกข้อมูลให้ครบถ้วน");
-            resultsSection.classList.remove("show");
+            resultsSection.classList.add("opacity-0", "translate-y-5", "hidden");
+            resultsSection.classList.remove("opacity-100", "translate-y-0");
             return;
           }
 
-          const sortedByUnitPrice = [...products].sort(
-            (a, b) => a.unitPrice - b.unitPrice
-          );
-
+          const sortedByUnitPrice = [...products].sort((a, b) => a.unitPrice - b.unitPrice);
           const bestValueProduct = sortedByUnitPrice[0];
           const bestPrice = bestValueProduct.unitPrice;
           let nextBestPrice = null;
@@ -628,27 +322,34 @@
           }
 
           resultsBody.innerHTML = "";
-          // Display products in their original input order
           const displayProducts = [...products].sort((a,b) => a.originalIndex - b.originalIndex);
 
           displayProducts.forEach((prod) => {
-            let rowClass = "";
             let valueText = "-";
+            let emoji = "";
+            let trClasses = "border-b hover:bg-gray-50";
+            let tdNameClasses = "px-6 py-4 font-medium text-gray-900 whitespace-nowrap";
+            let tdOtherClasses = "px-6 py-4";
+
 
             if (prod.unitPrice === bestPrice) {
-              rowClass = "best-value";
+              emoji = "🏆 ";
               valueText = "คุ้มค่าที่สุด";
+              trClasses = "border-b bg-green-50 hover:bg-green-100";
+              tdNameClasses = "px-6 py-4 font-semibold text-green-700 whitespace-nowrap";
             } else if (nextBestPrice && prod.unitPrice === nextBestPrice) {
-              rowClass = "next-best-value";
+              emoji = "🥈 ";
               valueText = "คุ้มค่าลำดับถัดมา";
+              trClasses = "border-b bg-blue-50 hover:bg-blue-100";
+              tdNameClasses = "px-6 py-4 font-medium text-blue-700 whitespace-nowrap";
             }
 
             const row = document.createElement("tr");
-            row.className = rowClass;
+            row.className = trClasses;
             row.innerHTML = `
-              <td>${prod.brand}</td>
-              <td>${prod.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</td>
-              <td>${valueText}</td>
+              <td class="${tdNameClasses}">${emoji}${prod.brand}</td>
+              <td class="${tdOtherClasses}">${prod.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</td>
+              <td class="${tdOtherClasses}">${valueText}</td>
             `;
             resultsBody.appendChild(row);
           });
@@ -656,52 +357,49 @@
           const bestValueItems = sortedByUnitPrice.filter(p => p.unitPrice === bestPrice);
           const bestNames = bestValueItems.map(p => p.brand).join(" และ ");
           summaryDiv.innerHTML = `
-            <p>
-              แบรนด์ที่ <strong>คุ้มค่าที่สุด</strong> คือ <strong>${bestNames}</strong>
-              ด้วยราคาต่อหน่วย <strong>${bestPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท
+            <p class="text-base sm:text-lg">
+              แบรนด์ที่ <strong class="font-semibold text-primary-dark">คุ้มค่าที่สุด</strong> คือ <strong class="font-semibold text-primary-dark">${bestNames}</strong>
+              ด้วยราคาต่อหน่วย <strong class="font-semibold text-primary-dark">${bestPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท
             </p>
           `;
 
-          const mainBest = bestValueItems[0]; // Use the first one for detailed recommendation
+          const mainBest = bestValueItems[0];
           let recommendationHTML = `
             <p>
-              หากคุณซื้อ <strong>${mainBest.quantity.toLocaleString()}</strong> หน่วยของ <strong>${mainBest.brand}</strong>
-              คุณจะจ่ายทั้งหมด <strong>${mainBest.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท
+              หากคุณซื้อ <strong class="font-medium text-gray-800">${mainBest.quantity.toLocaleString()}</strong> หน่วยของ <strong class="font-medium text-gray-800">${mainBest.brand}</strong>
+              คุณจะจ่ายทั้งหมด <strong class="font-medium text-gray-800">${mainBest.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท.
             </p>
           `;
 
           if (nextBestPrice) {
             const nextBestItems = sortedByUnitPrice.filter(p => p.unitPrice === nextBestPrice);
             if (nextBestItems.length > 0) {
-                const nextBestItem = nextBestItems[0]; // Take the first one if multiple next-bests
+                const nextBestItem = nextBestItems[0];
                 const diffPerUnit = nextBestItem.unitPrice - mainBest.unitPrice;
-                
-                if (diffPerUnit > 0) { // Only show comparison if truly more expensive
+                if (diffPerUnit > 0.001) { // Check for meaningful difference
                     const savingsPerUnitForBest = diffPerUnit;
                     const totalSavingsForBest = savingsPerUnitForBest * mainBest.quantity;
-
                     recommendationHTML += `
                     <p>
-                        เมื่อเทียบกับ <strong>${nextBestItem.brand}</strong> (ราคาต่อหน่วย ${nextBestItem.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท),
-                        การเลือก <strong>${mainBest.brand}</strong> จะช่วยให้คุณประหยัดได้
-                        <strong>${savingsPerUnitForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาทต่อหน่วย.
+                        เมื่อเทียบกับ <strong class="font-medium text-gray-800">${nextBestItem.brand}</strong> (ราคาต่อหน่วย ${nextBestItem.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท),
+                        การเลือก <strong class="font-medium text-gray-800">${mainBest.brand}</strong> จะช่วยให้คุณประหยัดได้
+                        <strong class="font-medium text-green-600">${savingsPerUnitForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาทต่อหน่วย.
                     </p>
                     <p>
-                        หากซื้อจำนวน <strong>${mainBest.quantity.toLocaleString()}</strong> หน่วยเท่ากัน,
-                        คุณจะประหยัดเงินได้ถึง <strong>${totalSavingsForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท.
-                    </p>
-                    `;
+                        หากซื้อจำนวน <strong class="font-medium text-gray-800">${mainBest.quantity.toLocaleString()}</strong> หน่วยเท่ากัน,
+                        คุณจะประหยัดเงินได้ถึง <strong class="font-medium text-green-600">${totalSavingsForBest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> บาท.
+                    </p>`;
                 }
             }
           } else if (products.length > 1 && bestValueItems.length === products.length) {
             recommendationHTML += `<p>สินค้าทุกรายการในรายการนี้มีความคุ้มค่าเท่ากัน!</p>`;
           } else if (products.length === 1) {
-             recommendationHTML += `<p>คุณมีสินค้าเพียงรายการเดียวให้พิจารณา</p>`;
+             recommendationHTML += `<p>คุณมีสินค้าเพียงรายการเดียวให้พิจารณา.</p>`;
           }
 
-
           recommendationDiv.innerHTML = recommendationHTML;
-          resultsSection.classList.add("show");
+          resultsSection.classList.remove("hidden", "opacity-0", "translate-y-5");
+          resultsSection.classList.add("opacity-100", "translate-y-0");
           resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -710,18 +408,17 @@
           let tableText = "ผลการเปรียบเทียบราคา:\n";
           tableRows.forEach(row => {
               const cells = Array.from(row.querySelectorAll("td"));
-              tableText += `${cells[0].textContent} | ราคาต่อหน่วย: ${cells[1].textContent} | ${cells[2].textContent}\n`;
+              tableText += `${cells[0].textContent.trim()} | ราคาต่อหน่วย: ${cells[1].textContent.trim()} | ${cells[2].textContent.trim()}\n`;
           });
 
           const summaryText = summaryDiv.textContent.replace(/\s+/g, " ").trim();
           const recommendationText = recommendationDiv.textContent.replace(/\s+/g, " ").trim();
-          
           const fullText = `${tableText}\nสรุป:\n${summaryText}\n\nคำแนะนำเพิ่มเติม:\n${recommendationText}`;
           
           navigator.clipboard.writeText(fullText)
             .then(() => {
               copyResultsBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                   <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                 </svg>
                 คัดลอกแล้ว!`;
@@ -732,7 +429,7 @@
               }, 2500);
             })
             .catch((err) => {
-              showErrorMessage("ไม่สามารถคัดลอกผลลัพธ์ได้: " + err);
+              showErrorMessage("ไม่สามารถคัดลอกผลลัพธ์ได้: " + err.message);
               console.error("Error copying text: ", err);
             });
         });
@@ -740,7 +437,6 @@
         addProductBtn.addEventListener("click", addProduct);
         calculateBtn.addEventListener("click", calculate);
 
-        // Add initial product items
         addProduct();
         addProduct();
       });
